@@ -28,7 +28,7 @@ from itertools import izip_longest
 from lxml import html
 
 # 提取信息用的正则表达式
-# REs fpr extracting various info
+# REs for extracting various info
 RE_EXPRS = [
         # 匹配回复头部
         # Post header
