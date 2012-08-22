@@ -147,7 +147,7 @@ def posttime_validator_factory(valid_date):
 def votefrompost(self, post):
     valid_date, aliases = self['date'], self['aliases']
     posttime, tripcode, txt = post['time'], post['tripcode'], post['text']
-    is_posttime_valid = posttime_validator_fatory(valid_date)
+    is_posttime_valid = posttime_validator_factory(valid_date)
 
     if not is_posttime_valid(posttime):
         # post time outside of accepted range, ignore the post
