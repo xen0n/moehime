@@ -113,6 +113,8 @@ def parse_config(lines):
 
 def parse_chara(line):
     names = line.split(',')
+
+    # TODO: further canonicalize the names 让名字更标准化一点
     name, aliases = names[0], names[1:]
     return {
             'name': name,
@@ -126,12 +128,14 @@ def build_alias_map(charas):
     for chara in charas:
         name = chara['name']
 
-        # 自反映射
-        # reflexive mapping
-        result[name] = name
-
+        # the structure can't be a simple reverse index, due to the alias
+        # match not being exact. Using such a mapping would complicate the
+        # code when it comes to handling those non-exact-match cases.
+        # 这个数据结构不能简单地用反向索引，因为别名匹配不是精确的。
+        # 用了这种映射会复杂化处理模糊匹配情况的那部分代码。
+        aliases = result[name] = []
         for alias in chara['aliases']:
-            result[alias] = name
+            aliases.append(alias)
 
     return result
 

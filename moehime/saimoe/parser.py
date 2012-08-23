@@ -171,36 +171,23 @@ def votefrompost(self, post):
 
     # individual votes for characters
     # 分离各角色的票
-    votes = list(set(
-        chara_match.group(1)
-        for chara_match in RE_CHARA.finditer(txt)
-        ))
-
-    # normalize the character names
-    # 标准化角色名
-    norm_votes, invalids = [], []
-    for name in votes:
-        norm_name = aliases.get(name, None)
-        if norm_name is None:
-            # Invalid vote, record this fact
-            # 无效票，记录下
-            invalids.append(name)
-            continue
-        norm_votes.append(norm_name)
+    votes = [
+            chara_match.group(1)
+            for chara_match in RE_CHARA.finditer(txt)
+            ]
 
     return True, {
             'time': posttime,
             'tripcode': tripcode,
             'code': code,
-            'votes': norm_votes,
-            'invalids': invalids,
+            'votes': votes,
             }
 
 
 def i_votefromposts(self, posts):
     for post in posts:
-        is_valid_vote, vote_info = votefrompost(self, post)
-        if is_valid_vote:
+        is_wellformed_vote, vote_info = votefrompost(self, post)
+        if is_wellformed_vote:
             yield vote_info
 
 
