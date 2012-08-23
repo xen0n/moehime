@@ -36,8 +36,66 @@ def insertvote(dct, key, vote):
     dct[key].append(vote)
 
 
+# a factory function here avoids repetitive calls to ``cfg.__getitem__``
+# and ``aliases.keys``.
+# 这里使用工厂函数避免了对 ``cfg.__getitem__`` 和 aliases.keys`` 的重复调用
+def alias_map_factory(cfg):
+    groups, aliases = cfg['groups'], cfg['aliases']
+    canonical_names = aliases.keys()
+
+    def _map_aliases(vote):
+        entries = vote['votes']
+
+        # TODO: add limitation on entries count 加入每票可投角色数量的限制
+        valids, invalids = [], []
+        for entry in entries:
+            if entry in canonical_names:
+                # shortcut
+                # 捷径
+                valids.append(entry)
+                continue
+
+            # non-exact alias matching
+            # 模糊的别名匹配
+            matched_name, is_ambiguous = None, False
+            for name, alias_list in aliases.iteritems():
+                for alias in alias_list:
+                    if alias in entry:
+                        # the alias matches, but we must pay attention to
+                        # the invalid case in which ``entry`` matches more
+                        # than one character.
+                        # 匹配到别名，不过要小心同时匹配多个角色的无效情况
+                        if matched_name is not None:
+                            # ambiguous vote, considered invalid
+                            # 歧义票，无效
+                            is_ambiguous = True
+                            break
+
+                        # remember the currently matched canonical name,
+                        # then break out to try the next character
+                        # 记住目前匹配上的标准角色名，然后去匹配下一个角色
+                        matched_name = name
+                        break
+
+                if is_ambiguous:
+                    # no need to continue.
+                    # 不用循环了
+                    break
+
+            if matched_name is None or is_ambiguous:
+                invalids.append(entry)
+                continue
+
+            valids.append(matched_name)
+
+        return valids, invalids
+    return _map_aliases
+
+
 def countvotes(cfg, votes):
-    aliases = cfg['aliases']
+    # construct the aliases resolver function
+    # 构造别名解析函数
+    alias_mapper = alias_map_factory(cfg)
 
     charas, invalids = {}, {}
     tripcodes, codes = {}, {}
@@ -69,7 +127,10 @@ def countvotes(cfg, votes):
             continue
         codes[code] = None
 
-        vote_invalids = vote['invalids']
+        # resolve aliases
+        # 解析别名
+        vote_valids, vote_invalids = alias_mapper(vote)
+
         if len(vote_invalids) > 0:
             # has invalid votes inside, ignore other valid votes from this
             # entry
@@ -79,7 +140,7 @@ def countvotes(cfg, votes):
 
             continue
 
-        for name in vote['votes']:
+        for name in vote_valids:
             # the name is already canonicalized in parser
             # 解析模块里面已经把名字标准化了
             insertvote(charas, name, vote)
