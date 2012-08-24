@@ -34,6 +34,32 @@ from itertools import izip_longest
 import datetime
 from time import mktime
 
+# backends possibly need configuration, mainly because of Windows
+# Also Tk's look-and-feel sucks
+# XXX this code is definitely smelly, needs to get rid of very soon
+# 图形后端可能需要配置，主要是因为要支持 Windows 的原因
+# 而且 Tk 界面给人感觉实在蛋疼
+# XXX 这段代码味道很不好，需要非常快地解决掉
+import matplotlib
+_backend_decided = False
+
+if sys.platform == 'win32':
+    try:
+        import PySide
+        matplotlib.rc('backend', qt4='PySide')
+        matplotlib.use('Qt4Agg')
+        _backend_decided = True
+    except ImportError:
+        pass
+else:
+    # let's use auto detection on non-Windows platforms
+    # 非 Windows 平台就用自动检测吧
+    _backend_decided = True
+
+if not _backend_decided:
+    raise RuntimeError('could not decide what backend to use')
+del _backend_decided
+
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fontmgr
 from matplotlib.dates import date2num, AutoDateFormatter, AutoDateLocator
