@@ -20,11 +20,13 @@
 # along with moehime.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from __future__ import unicode_literals, division
+from __future__ import unicode_literals, division, print_function
 
-from sys import stderr
+from sys import stdout, stderr
 from itertools import chain
 import cPickle
+
+import locale
 
 from ..saimoe import fetch
 from ..saimoe import config
@@ -32,11 +34,30 @@ from ..saimoe import parser
 from ..saimoe import counter
 
 
+# Windows console encoding is WAY more restrictive than UTF-8 used by Linux
+# Must provide a wrapper to hide the difference
+# Windows 控制台编码比起 Linux 的 UTF-8 来实在是太不自由了
+# 必须用一层包装隐藏掉这个差异性
+def print_wrapper_factory():
+    enc = locale.getpreferredencoding()
+
+    def _print_wrapper(value='', *args, **kwargs):
+        if isinstance(value, unicode):
+            value = value.encode(enc, 'replace')
+
+        print(value, *args, **kwargs)
+        return
+    return _print_wrapper
+
+
+print_wrapper = print_wrapper_factory()
+
+
 def print_list(lst):
     for count, name in lst:
-        print '%-3d 票 %s' % (count, name, )
+        print_wrapper('%-3d 票 %s' % (count, name, ))
 
-    print
+    print_wrapper()
     return
 
 
@@ -45,7 +66,7 @@ def cli_entry(argv):
     urls = argv[2:]
 
     cfg = None
-    print >>stderr, 'reading config'
+    print_wrapper('reading config', file=stderr)
     with open(cfg_path, 'r') as fp:
         cfg = config.readconfig(fp)
 
@@ -55,12 +76,12 @@ def cli_entry(argv):
     #         for k, v in sorted((v, k) for k, v in aliases.items())
     #         )
 
-    print >>stderr, 'fetching'
+    print_wrapper('fetching', file=stderr)
     htmls = []
     for url in urls:
-        print >>stderr, '  %s ...' % (url, ),
+        print_wrapper('  %s ...' % (url, ), end='', file=stderr)
         s = fetch.do_fetch(url)
-        print >>stderr, '%d bytes' % len(s)
+        print_wrapper('%d bytes' % (len(s), ), file=stderr)
 
         # XXX: chardet couldn't be used, it reported ISO-8859-2 for the
         # livedoor.jp thing!
@@ -71,7 +92,7 @@ def cli_entry(argv):
 
         htmls.append(s.decode(page_enc, 'replace'))
 
-    print >>stderr, 'parsing'
+    print_wrapper('parsing', file=stderr)
 
     thread = chain(*[parser.i_dlthreadfromstring(s) for s in htmls])
 
@@ -86,7 +107,7 @@ def cli_entry(argv):
             count_result['dup_codes'],
             ]
 
-    print >>stderr, 'processing done, writing pickle'
+    print_wrapper('processing done, writing pickle', file=stderr)
     with open(
             '%02d%02d%02d.pickle' % (
                 cfg['date'].year,
@@ -100,7 +121,7 @@ def cli_entry(argv):
             'result': count_result,
             }))
 
-    print >>stderr, 'arranging result for display\n'
+    print_wrapper('arranging result for display', end='\n\n', file=stderr)
 
     displaylists, total_counts = [], []
     for group in groups:
@@ -124,16 +145,16 @@ def cli_entry(argv):
 
     # display
     for idx, lst in enumerate(displaylists):
-        print '今日第 %d 组 [%d 票]' % (idx + 1, total_counts[idx], )
+        print_wrapper('今日第 %d 组 [%d 票]' % (idx + 1, total_counts[idx], ))
         print_list(lst)
 
-    print '以下为今日无效票'
+    print_wrapper('以下为今日无效票')
     print_list(invalids_list)
 
-    print '以下为重复的帖子 ID'
+    print_wrapper('以下为重复的帖子 ID')
     print_list(sorted((len(v) + 1, k) for k, v in dup_ids.iteritems()))
 
-    print '以下为重复的 code'
+    print_wrapper('以下为重复的 code')
     print_list(sorted((len(v) + 1, k) for k, v in dup_codes.iteritems()))
 
     # print >>stderr, '\n'.join(repr(i) for i in aliases.iterkeys())
