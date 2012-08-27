@@ -144,8 +144,8 @@ def posttime_validator_factory(valid_date):
     return __is_posttime_valid
 
 
-def votefrompost(self, post):
-    valid_date, aliases = self['date'], self['aliases']
+def votefrompost(cfg, post):
+    valid_date, aliases = cfg.date, cfg.aliases
     posttime, tripcode, txt = post['time'], post['tripcode'], post['text']
     is_posttime_valid = posttime_validator_factory(valid_date)
 

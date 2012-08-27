@@ -21,11 +21,6 @@
 
 from __future__ import unicode_literals, division
 
-
-# vim:ai:et:ts=4:sw=4:sts=4:ff=unix:fenc=utf-8:
-
-from __future__ import unicode_literals, division
-
 from itertools import chain
 
 
@@ -40,7 +35,7 @@ def insertvote(dct, key, vote):
 # and ``aliases.keys``.
 # 这里使用工厂函数避免了对 ``cfg.__getitem__`` 和 aliases.keys`` 的重复调用
 def alias_map_factory(cfg):
-    groups, aliases = cfg['groups'], cfg['aliases']
+    groups, aliases = cfg.groups, cfg.aliases
     canonical_names = aliases.keys()
 
     def _map_aliases(vote):

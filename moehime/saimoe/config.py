@@ -21,19 +21,29 @@
 
 from __future__ import unicode_literals, division
 
-
-# vim:ai:et:ts=4:sw=4:sts=4:ff=unix:fenc=utf-8:
-from __future__ import unicode_literals, division
-
 from itertools import chain
 import datetime
 
+# TODO: make this configurable thru app config (although not so useful)
+# 让这个可以通过程序配置自定义（虽然没什么好处）
 CONFIG_ENCODING = 'sjis'
 
 
-def readconfig(fp):
-    lines = _read_raw_lines(fp)
-    return parse_config(lines)
+class CrawlConfig(object):
+    def __init__(self, path=None):
+        self.path = path
+        self._inited = False
+
+    def readconfig(self):
+        with open(self.path, 'rb') as fp:
+            lines = _read_raw_lines(fp)
+
+        config = parse_config(lines)
+
+        self.date = config['date']
+        self.groups = config['groups']
+        self.limit = config['limit']
+        self.aliases = config['aliases']
 
 
 def _read_raw_lines(fp):

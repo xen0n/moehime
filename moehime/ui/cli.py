@@ -32,7 +32,7 @@ import datetime
 from ..__version__ import VERSION_STR
 
 from ..saimoe import fetch
-from ..saimoe import config
+from ..saimoe.config import CrawlConfig
 from ..saimoe import parser
 from ..saimoe import counter
 
@@ -74,13 +74,12 @@ def cli_entry(argv):
     cfg_path = argv[1]
     urls = argv[2:]
 
-    cfg = None
+    cfg = CrawlConfig(cfg_path)
     print_wrapper('reading config', file=stderr)
-    with open(cfg_path, 'r') as fp:
-        cfg = config.readconfig(fp)
+    cfg.readconfig()
 
     # TODO: refactor this!
-    groups, aliases = cfg['groups'], cfg['aliases']
+    groups, aliases = cfg.groups, cfg.aliases
     # print '\n'.join('%s|%s' % (k, v, )
     #         for k, v in sorted((v, k) for k, v in aliases.items())
     #         )
@@ -117,14 +116,7 @@ def cli_entry(argv):
             ]
 
     print_wrapper('processing done, writing pickle', file=stderr)
-    with open(
-            '%02d%02d%02d.pickle' % (
-                cfg['date'].year,
-                cfg['date'].month,
-                cfg['date'].day,
-                ),
-            'wb',
-            ) as fp:
+    with open('%s.pickle' % cfg.date.strftime('%Y%m%d'), 'wb') as fp:
         fp.write(cPickle.dumps({
             'cfg': cfg,
             'result': count_result,
