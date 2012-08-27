@@ -24,9 +24,12 @@ from __future__ import unicode_literals, division, print_function
 
 from sys import stdout, stderr
 from itertools import chain
-import cPickle
 
+import cPickle
 import locale
+import datetime
+
+from ..__version__ import VERSION_STR
 
 from ..saimoe import fetch
 from ..saimoe import config
@@ -51,6 +54,12 @@ def print_wrapper_factory():
 
 
 print_wrapper = print_wrapper_factory()
+
+
+def show_banner():
+    now = datetime.datetime.today()
+    print_wrapper('结果提供：萌姬 v%s' % (VERSION_STR, ))
+    print_wrapper('生成时间：%s' % now.strftime('%F %T'))
 
 
 def print_list(lst):
@@ -144,6 +153,7 @@ def cli_entry(argv):
     invalids_list.sort(reverse=True)
 
     # display
+    show_banner()
     for idx, lst in enumerate(displaylists):
         print_wrapper('今日第 %d 组 [%d 票]' % (idx + 1, total_counts[idx], ))
         print_list(lst)
