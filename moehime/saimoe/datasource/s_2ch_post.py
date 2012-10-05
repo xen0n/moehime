@@ -21,6 +21,7 @@
 
 from __future__ import unicode_literals, division
 
+import abc
 import re
 import datetime
 
@@ -29,36 +30,18 @@ from pyquery import PyQuery as pq
 from ..exc import PostBadHeaderError, PostOutOfRangeError
 from .base import PostBase
 
-# 提取信息用的正则表达式
-# REs for extracting various info
-RE_EXPRS = [
-        # 匹配回复头部
-        # Post header
-        (
-            r'(?P<Y>\d{4})/(?P<m>\d{2})/(?P<d>\d{2})\([日月水火木金土]\)'
-            r'\s+(?P<H>\d{2}):(?P<i>\d{2}):(?P<s>\d{2}(?:\.\d{2})?)'
-            r'\s+ID:(?P<id>[0-9A-Za-z+/.]{8,})'
-            ),
-        # 匹配code
-        # Vote code
-        r'\[\[asm12-(?P<day>\d{2})-[0-9A-Za-z./]{8}-[A-Za-z]{2}\]\]-\d{5}',
-        # 匹配角色名/alias，之后对内容进行精确匹配
-        # Character name/alias, the captured string is then matched
-        # in an exact mannner
-        r'<<(.*?)>>',
-        ]
-
-[RE_HEADER, RE_CODE, RE_CHARA, ] = [re.compile(_expr) for _expr in RE_EXPRS]
-del _expr
+# 匹配回复头部
+# Post header
+RE_HEADER = re.compile(
+        r'(?P<Y>\d{4})/(?P<m>\d{2})/(?P<d>\d{2})\([日月水火木金土]\)'
+        r'\s+(?P<H>\d{2}):(?P<i>\d{2}):(?P<s>\d{2}(?:\.\d{2})?)'
+        r'\s+ID:(?P<id>[0-9A-Za-z+/.]{8,})'
+        )
 
 # "speed up" header group matching by not re-creating the same tuple every
 # time a post is analyzed
 # “加速”帖子头部匹配过程，不要每次都构造一遍元组
 _RE_HEADER_GROUPS = ('Y', 'm', 'd', 'H', 'i', 's', 'id', )
-
-
-def mailto_helper(addr):
-    return '' if addr is None else addr[7:]  # len('mailto:') == 7
 
 
 def is_post_in_thread_range(floor_no, thread_info):
@@ -68,8 +51,12 @@ def is_post_in_thread_range(floor_no, thread_info):
     return start <= floor_no <= end
 
 
-class Post_2ch(PostBase):
+class BasePost_2ch(PostBase):
+    __metaclass__ = abc.ABCMeta
+
     def __init__(self, raw_post, thread_info):
+        super(BasePost_2ch, self).__init__(raw_post, thread_info)
+
         e_dt, e_dd = raw_post
         dt, dd = pq(e_dt), pq(e_dd)
 
@@ -77,8 +64,8 @@ class Post_2ch(PostBase):
 
         # is the post ACTUALLY in range specified by thread?
         # 帖子真的在线索指定的范围吗？
-        # XXX hack here 这里图省事了
-        floor_no = int(hdr_txt[:hdr_txt.find(' ')])
+        floor_no = self.get_floor_from_header(raw_post)
+
         if not is_post_in_thread_range(floor_no, thread_info):
             # abort instantiation, because it's useless
             # 中断实例化，因为再进行下去已经没有意义了
@@ -87,12 +74,7 @@ class Post_2ch(PostBase):
         post_txt = '\n'.join(e_dd.itertext())
 
         # post author info 帖子作者信息
-        author_link = dt(b'a')
-        author_elem = author_link if len(author_link) != 0 else dt(b'font')
-        author, email = (
-                author_elem.text(),
-                mailto_helper(author_elem.attr('href')),
-                )
+        author, email = self.get_author_info(raw_post)
 
         # extract post time and tripcode
         # TODO: author name and mail address 作者名和邮件地址
@@ -126,6 +108,18 @@ class Post_2ch(PostBase):
         self.posttime = posttime
         self.text = post_txt
 
+    @abc.abstractmethod
+    def get_floor_from_header(self, hdr_txt):
+        return 0
+
+    @abc.abstractmethod
+    def get_author_info(self):
+        return '', ''
+
+    def _mailto_helper(self, addr):
+        return '' if addr is None else addr[7:]  # len('mailto:') == 7
+
+
     def _to_voteobject_args(self):
         author = {
                 'name': self.author,
@@ -134,6 +128,32 @@ class Post_2ch(PostBase):
                 }
 
         return author, self.posttime, self.text
+
+
+class Post_2ch(BasePost_2ch):
+    def __init__(self, raw_post, thread_info):
+        super(Post_2ch, self).__init__(raw_post, thread_info)
+
+    def get_floor_from_header(self, raw_post):
+        e_dt, e_dd = raw_post
+        dt, dd = pq(e_dt), pq(e_dd)
+
+        hdr_txt = dt.text()
+        # XXX hack here 这里图省事了
+        return int(hdr_txt[:hdr_txt.find(' ')])
+
+    def get_author_info(self, raw_post):
+        e_dt, e_dd = raw_post
+        dt, dd = pq(e_dt), pq(e_dd)
+
+        author_link = dt(b'a')
+        author_elem = author_link if len(author_link) != 0 else dt(b'font')
+        author, email = (
+                author_elem.text(),
+                self._mailto_helper(author_elem.attr('href')),
+                )
+
+        return author, email
 
 
 # vim:ai:et:ts=4:sw=4:sts=4:ff=unix:fenc=utf-8:
