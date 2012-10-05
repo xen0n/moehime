@@ -48,7 +48,7 @@ class ResourceRequester(object):
                 })
 
     @abc.abstractmethod
-    def format_url(self, *args, **kwargs):
+    def format_url(self, kind, *args, **kwargs):
         pass
 
     @abc.abstractmethod
@@ -65,8 +65,8 @@ class ResourceRequester(object):
             return s.encode(self.get_encoding(kind), *args, **kwargs)
         return s
 
-    def fetch(self, *args, **kwargs):
-        url = self.format_url(*args, **kwargs)
+    def fetch(self, kind, *args, **kwargs):
+        url = self.format_url(kind, *args, **kwargs)
         return do_fetch(url, self._requests_session)
 
     def fetch_pq(self, kind, *args, **kwargs):
