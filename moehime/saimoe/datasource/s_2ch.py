@@ -77,7 +77,7 @@ class Base2chDatasource(DatasourceBase, ResourceRequester):
                 self.search_url_prefix,
                 b'?',
                 urlencode((
-                    ('STR', self.to_str(kind, qs)),
+                    ('STR', self.to_str(URL_SEARCH, qs)),
                     ('COUNT', count),
                     ('TYPE', 'TITLE'),
                     ('BBS', 'ALL'),
