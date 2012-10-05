@@ -63,27 +63,32 @@ class Base2chDatasource(DatasourceBase, ResourceRequester):
     def search_url_prefix(self):
         return b'http://find.2ch.net/'
 
-    def format_url(self, kind, *args):
+    def _format_url_read(self, tid, start, end):
+        end_str = b'' if end is None else str(end)
+        return self.post_url_prefix + self.readcgi_url % {
+                'tid': tid,
+                'start': start,
+                'end': end_str,
+                }
+
+    def _format_url_search(self, qs, max_count=None):
+        count = 10 if max_count is None else max_count
+        return b''.join([
+                self.search_url_prefix,
+                b'?',
+                urlencode((
+                    ('STR', self.to_str(kind, qs)),
+                    ('COUNT', count),
+                    ('TYPE', 'TITLE'),
+                    ('BBS', 'ALL'),
+                    )),
+                ])
+
+    def format_url(self, kind, *args, **kwargs):
         if kind == URL_READ:
-            tid, start, end = args[:3]
-            end_str = b'' if end is None else str(end)
-            url = self.post_url_prefix + self.readcgi_url % {
-                    'tid': tid,
-                    'start': start,
-                    'end': end_str,
-                    }
+            url = self._format_url_read(*args, **kwargs)
         elif kind == URL_SEARCH:
-            qs, max_count = args[:2]
-            url = b''.join([
-                    self.search_url_prefix,
-                    b'?',
-                    urlencode((
-                        ('STR', self.to_str(kind, qs)),
-                        ('COUNT', 10 if max_count is None else max_count),
-                        ('TYPE', 'TITLE'),
-                        ('BBS', 'ALL'),
-                        )),
-                        ])
+            url = self._format_url_search(*args, **kwargs)
         else:
             raise NotImplementedError
 
