@@ -32,6 +32,22 @@ class FilterManager(object):
         self._classes[name] = cls
         return cls
 
+    @property
+    def filters(self):
+        return self._classes
+
+
+class ChainedFilter(object):
+    def __init__(self, filters):
+        self._filters = []
+        for name, args, kwargs in filters:
+            filter_cls = filter_manager.filters[name]
+            self._filters.append(filter_cls(*args, **kwargs))
+
+    def judge(self, dataset):
+        for filter_obj in self._filters:
+            filter_obj.judge(dataset)
+
 
 filter_manager = FilterManager()
 
