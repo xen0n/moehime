@@ -24,19 +24,54 @@ from __future__ import unicode_literals, division
 import abc
 
 from . import src_manager
+from .base import URL_SEARCH
 from .s_2ch import Base2chDatasource
+from .livedoor_thread import PostThreadInfo_livedoor
+from .livedoor_post import Post_livedoor
+
+THREAD_LIST_URL = b'http://jbbs.livedoor.jp/anime/8440/'
+THREAD_LIST_SELECTOR = b'a[name != "menu"] + table dl'
 
 
 @src_manager.register_datasource('livedoor')
 class LivedoorDatasource(Base2chDatasource):
+    THREAD_INFO_CLASS = PostThreadInfo_livedoor
+    POST_CLASS = Post_livedoor
+
     def get_encoding(self, kind):
         return 'euc-jp'
 
     @property
-    def readcgi_url(self):
-        return 'bbs/read.cgi/anime/8440/%(tid)d/%(start)d-%(end)s'
+    def board_name(self):
+        # This is actually useless for livedoor, but a concrete implementation
+        # must be in place
+        # 这对 livedoor 实际上没有意义，但必须要是一个具体的实现
+        return b'jbbs'
 
-    # TODO: implement thread list parsing
+    @property
+    def post_url_prefix(self):
+        return b'http://jbbs.livedoor.jp/'
+
+    @property
+    def readcgi_url(self):
+        return 'bbs/read.cgi/anime/8440/%(tid)s/%(start)d-%(end)s'
+
+    @property
+    def post_list_selector(self):
+        return b'#thread-body'
+
+    def _format_url_search(self):
+        # This interface does not (need to) respect the max count setting
+        # Also query string is ignored
+        # 这个界面不（需要）遵守最多结果数设置的
+        # 查询字串也被无视了
+        return THREAD_LIST_URL
+
+    def _do_get_thread_list(self, max_count):
+        result_page = self.fetch_pq(URL_SEARCH)
+        threads_dl = result_page(THREAD_LIST_SELECTOR)
+
+        return threads_dl
 
 
 # vim:ai:et:ts=4:sw=4:sts=4:ff=unix:fenc=utf-8:
