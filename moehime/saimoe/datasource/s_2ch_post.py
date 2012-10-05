@@ -119,7 +119,6 @@ class BasePost_2ch(PostBase):
     def _mailto_helper(self, addr):
         return '' if addr is None else addr[7:]  # len('mailto:') == 7
 
-
     def _to_voteobject_args(self):
         author = {
                 'name': self.author,
