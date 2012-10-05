@@ -34,4 +34,8 @@ class PostOutOfRangeError(PostError):
     pass
 
 
+class MalformedCodeError(ValueError):
+    pass
+
+
 # vim:ai:et:ts=4:sw=4:sts=4:ff=unix:fenc=utf-8:
