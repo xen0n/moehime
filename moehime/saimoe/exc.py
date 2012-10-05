@@ -22,6 +22,14 @@
 from __future__ import unicode_literals, division
 
 
+class ThreadInfoError(ValueError):
+    pass
+
+
+class ThreadBadTitleError(ThreadInfoError):
+    pass
+
+
 class PostError(ValueError):
     pass
 

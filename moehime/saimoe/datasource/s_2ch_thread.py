@@ -27,6 +27,7 @@ import datetime
 from pyquery import PyQuery as pq
 
 from .base import PostThreadInfoBase
+from ..exc import ThreadBadTitleError
 
 # RE_NUM_REPLIES = re.compile(r'^\((\d+)\)$')
 RE_TID = re.compile(r'read.cgi/[^/]+/(\d+)/(?:\d+)-(?:\d+)?$')
@@ -35,6 +36,8 @@ RE_MTIME = re.compile(
         r'(?P<Y>\d{4})/(?P<m>\d{2})/(?P<d>\d{2})\s+'
         r'(?P<H>\d{2}):(?P<M>\d{2})$'
         )
+
+VOTE_TITLE_SIGNATURE = '投票スレ'
 
 
 class PostThreadInfo_2ch(PostThreadInfoBase):
@@ -48,6 +51,9 @@ class PostThreadInfo_2ch(PostThreadInfoBase):
         # 提取 <dt> 中的头部信息
         link = dt(b'a')
         title, href = link.text(), link.attr('href')
+
+        if VOTE_TITLE_SIGNATURE not in title:
+            raise ThreadBadTitleError
 
         # extract thread id from href
         # 从链接地址里提取线索 id

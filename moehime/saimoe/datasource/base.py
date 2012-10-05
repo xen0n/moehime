@@ -24,7 +24,7 @@ from __future__ import unicode_literals, division
 import abc
 import datetime
 
-from ..exc import PostError
+from ..exc import ThreadInfoError, PostError
 from ..voteobject import VoteEntry
 
 URL_READ, URL_SEARCH = xrange(2)
@@ -58,7 +58,11 @@ class DatasourceBase(object):
         thread_class = self.__class__.THREAD_INFO_CLASS
 
         threads = self._do_get_thread_list(max_count)
-        return [thread_class(raw_thread, self) for raw_thread in threads]
+        for raw_thread in threads:
+            try:
+                yield thread_class(raw_thread, self)
+            except ThreadInfoError:
+                continue
 
     @abc.abstractmethod
     def _do_get_thread_list(self, max_count):
