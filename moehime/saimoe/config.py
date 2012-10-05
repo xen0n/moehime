@@ -24,40 +24,109 @@ from __future__ import unicode_literals, division
 from itertools import chain
 import datetime
 
+from os.path import exists
+
+from .net.fetch import ResourceRequester
+
 # TODO: make this configurable thru app config (although not so useful)
 # 让这个可以通过程序配置自定义（虽然没什么好处）
 CONFIG_ENCODING = 'sjis'
+CONFIG_URL_PREFIX = 'http://saimoe.googlecode.com/files/'
+CONFIG_PATH_PREFIX = './configs/'
+CONFIG_EXTENSION = '.txt'
+
+# The only "kind" used with ResourceRequester
+URL_CONFIG = 0
 
 
 class CrawlConfig(object):
-    def __init__(self, path=None):
+    def __init__(self, date, path=None):
+        super(CrawlConfig, self).__init__()
+        self.date = date
         self.path = path
         self._inited = False
 
+    def get_path(self, date):
+        # while this seems duplicate wrt WebBasedCrawlConfig.get_config_url,
+        # actually the local config file's naming convention has nothing to
+        # do with that of theremote repository.
+        return unicode(date.strftime('%m%d')).join((
+            CONFIG_PATH_PREFIX,
+            CONFIG_EXTENSION,
+            ))
+
     def readconfig(self):
-        with open(self.path, 'rb') as fp:
-            lines = _read_raw_lines(fp)
+        return self._do_readconfig()
+
+    def _do_readconfig(self, s=None):
+        lines = None
+
+        if s is None:
+            with open(self.path, 'rb') as fp:
+                content = _read_raw_lines(fp)
+        else:
+            content = s
+
+        lines = _lines_from_config(content)
 
         config = parse_config(lines)
 
-        self.date = config['date']
+        if self.date != config['date']:
+            raise ValueError('config date mismatch')
+
         self.groups = config['groups']
         self.limit = config['limit']
         self.aliases = config['aliases']
 
 
-def _read_raw_lines(fp):
-    content = fp.read()
+class WebBackedCrawlConfig(CrawlConfig, ResourceRequester):
+    def __init__(self, date, path=None):
+        super(WebBackedCrawlConfig, self).__init__(date, path)
 
+    def get_encoding(self, kind):
+        return CONFIG_ENCODING
+
+    def format_url(self, kind, date=None):
+        date = self.date if date is None else date
+
+        # http://.../config%m%d.txt
+        # construct the string 构建字符串
+        return unicode(date.strftime('%m%d')).join((
+                CONFIG_URL_PREFIX,
+                CONFIG_EXTENSION,
+                ))
+
+    def readconfig(self):
+        if not exists(self.path):
+            # TOCTTOU here... how to fix this ugliness?
+            # 这里有TOCTTOU情况。。谁知道怎么解决？
+            # TODO: fix the condition by using file.truncate()
+            configcontent = self.fetch(URL_CONFIG)
+            with open(self.path, 'wb') as fp:
+                fp.write(configcontent)
+
+            # save a file read, but is this worth the gained
+            # complexity of base class?
+            # 省一次读文件，但是值得为此增加基类的代码复杂度么？
+            return self._do_readconfig(configcontent)
+
+        return self._do_readconfig()
+
+
+def _lines_from_config(s):
     # XXX DAMN WINDOWS CRLF LINE-ENDING!!!
     # This led to MYSTERIOUS "invalid" aliases!!!
     # 去你妹的 Windows 行尾！这个导致了各种奇怪的“无效”别名。。
     #
     # thx @cerenkov, there's a string method called ``splitlines``...
     # 感谢 @cerenkov，string 有个方法叫 ``splitline``...
-    lines = content.decode(CONFIG_ENCODING).splitlines()
+    return s.decode(CONFIG_ENCODING).splitlines()
 
-    return lines
+
+def _read_raw_lines(fp):
+    content = fp.read()
+
+    return _lines_from_config(content)
 
 
 # config.txt syntax:
