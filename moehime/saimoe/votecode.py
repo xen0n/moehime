@@ -58,10 +58,10 @@ class VoteCode(object):
     def recognize(text):
         codes = RE_CODE_RECOGNIZER.findall(text)
         if len(codes) == 1:
-            return VoteCode(codes[0])
+            return VoteCode(codes[0]), RE_CODE_RECOGNIZER.sub('', text)
 
         # multiple codes or no code found...
-        return None
+        return None, text
 
 
 # vim:ai:et:ts=4:sw=4:sts=4:ff=unix:fenc=utf-8:

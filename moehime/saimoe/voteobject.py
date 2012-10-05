@@ -21,18 +21,6 @@
 
 from __future__ import unicode_literals, division
 
-import re
-
-from .votecode import VoteCode
-
-# 匹配角色名/alias，之后对内容进行精确匹配
-# Character name/alias, the captured string is then matched
-# in an exact mannner
-RE_CHARA = re.compile(r'<<(.*?)>>')
-
-# reduce lookups 减少查找
-VOTECODE_RECOGNIZE = VoteCode.recognize
-
 
 class VoteEntry(object):
     def __init__(self, author, ctime, text):
@@ -41,24 +29,10 @@ class VoteEntry(object):
         self.full_text = text
         self.text = ''
 
-        code = VOTECODE_RECOGNIZE(text)
-        is_valid = self.is_valid = code is not None
+        self.code = None
+        self.is_valid = True
         self.charas = []
         self.annotations = {}
-
-        if is_valid:
-            self._extract_charas()
-
-    def _chara_match_helper(self, match):
-        # record the chara and strip it out of text
-        # this way we get pure moe-mon
-        # 记录角色并将其从正文中剔除
-        # 这样我们就得到纯粹的萌文
-        self.charas.append(match.group(1))
-        return ''
-
-    def _extract_charas(self):
-        self.text = RE_CHARA.sub(self._chara_match_helper, self.full_text)
 
 
 # vim:ai:et:ts=4:sw=4:sts=4:ff=unix:fenc=utf-8:
