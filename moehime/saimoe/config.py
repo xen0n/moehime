@@ -64,11 +64,9 @@ class CrawlConfig(object):
 
         if s is None:
             with open(self.path, 'rb') as fp:
-                content = _read_raw_lines(fp)
+                lines = _read_raw_lines(fp)
         else:
-            content = s
-
-        lines = _lines_from_config(content)
+            lines = _lines_from_config(s)
 
         config = parse_config(lines)
 
