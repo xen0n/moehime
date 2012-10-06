@@ -23,6 +23,7 @@ from __future__ import unicode_literals, division
 
 from . import basic
 from . import dup
+from . import alias
 
 
 # vim:ai:et:ts=4:sw=4:sts=4:ff=unix:fenc=utf-8:
