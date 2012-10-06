@@ -54,6 +54,8 @@ class VoteCode(object):
         self.tail = m_grp('tail')
         self.ordinal = m_grp('ord')
 
+        self._content = s if isinstance(s, unicode) else s.decode('ascii')
+
     @staticmethod
     def recognize(text):
         codes = RE_CODE_RECOGNIZER.findall(text)
@@ -62,6 +64,16 @@ class VoteCode(object):
 
         # multiple codes or no code found...
         return None, text
+
+    @property
+    def content(self):
+        return self._content
+
+    def __unicode__(self):
+        return self.content
+
+    def __str__(self):
+        return self.content.encode('ascii')
 
 
 # vim:ai:et:ts=4:sw=4:sts=4:ff=unix:fenc=utf-8:
