@@ -55,7 +55,7 @@ class AliasFilter(BaseFilter):
     def __init__(self, config=None):
         super(AliasFilter, self).__init__(config)
 
-        self._aliases = config['aliases']
+        self._aliases = config.aliases
         self._canonical_names = aliases.keys()
 
     @simple_memoize

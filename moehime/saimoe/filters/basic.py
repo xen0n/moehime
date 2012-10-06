@@ -114,7 +114,7 @@ class BasicFilter(BaseFilter):
     FILTER_NAME = 'basic'
 
     def __init__(self, config):
-        valid_date = self.valid_date = config['date']
+        valid_date = self.valid_date = config.date
         self.date_validator = posttime_validator_factory(valid_date)
 
     def _do_judge(self, datum):
