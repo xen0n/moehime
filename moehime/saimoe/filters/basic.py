@@ -150,7 +150,7 @@ class CountFilter(BaseFilter):
 
     def _do_judge(self, datum):
         for chara in datum.charas:
-            self._result.setdefault(chara, 1)
+            self._result.setdefault(chara, 0)
             self._result[chara] += 1
         return True, None
 
