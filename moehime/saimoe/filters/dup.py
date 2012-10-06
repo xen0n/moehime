@@ -41,17 +41,31 @@ class DuplicationFilter(BaseFilter):
         self._codes, self._tripcodes = {}, {}
 
     def _do_judge(self, datum):
+        codes, tripcodes = self._codes, self._tripcodes
         tripcode, code = datum.author['tripcode'], unicode(datum.code)
 
-        if tripcode in self._tripcodes:
+        if tripcode in tripcodes:
             return False, _('识别码重复')
 
-        if code in self._codes:
+        if code in codes:
             return False, _('code 重复')
 
-        self._codes[code] = None
-        self._tripcodes[tripcode] = None
+        codes.setdefault(code, 0)
+        tripcodes.setdefault(tripcode, 0)
+
+        self._codes[code] += 1
+        self._tripcodes[tripcode] += 1
         return True, None
+
+    def report(self):
+        return {
+                'codes': {
+                    k: v for k, v in self._codes.iteritems() if v > 1
+                    },
+                'tripcodes': {
+                    k: v for k, v in self._tripcodes.iteritems() if v > 1
+                    },
+                }
 
 
 # vim:ai:et:ts=4:sw=4:sts=4:ff=unix:fenc=utf-8:
