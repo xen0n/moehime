@@ -45,8 +45,11 @@ class ChainedFilter(object):
             self._filters.append(filter_cls(*args, **kwargs))
 
     def judge(self, dataset):
+        report = {}
         for filter_obj in self._filters:
-            filter_obj.judge(dataset)
+            report[filter_obj.FILTER_NAME] = filter_obj.judge(dataset)
+
+        return report
 
 
 filter_manager = FilterManager()
