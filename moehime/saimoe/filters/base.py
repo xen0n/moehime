@@ -30,18 +30,27 @@ class BaseFilter(object):
     def __init__(self, config=None):
         super(BaseFilter, self).__init__()
 
+    def setup(self):
+        pass
+
     def judge(self, dataset):
+        _name = self.FILTER_NAME
+        self.setup()
         self.examine(dataset)
 
         for datum in dataset:
             if datum.is_valid:
-                result, annotation = self._do_judge(datum)
-                datum.is_valid = result
-                if annotation is not None:
-                    datum.annotations[self.FILTER_NAME] = annotation
+                datum.is_valid, datum.annotations[_name] = (
+                        self._do_judge(datum)
+                        )
+
+        return self.report()
 
     def examine(self, dataset):
         pass
+
+    def report(self):
+        return None
 
     @abc.abstractmethod
     def _do_judge(self, datum):

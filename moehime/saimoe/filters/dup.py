@@ -37,7 +37,7 @@ class DuplicationFilter(BaseFilter):
 
     FILTER_NAME = 'dup'
 
-    def examine(self, dataset):
+    def setup(self):
         self._codes, self._tripcodes = {}, {}
 
     def _do_judge(self, datum):
