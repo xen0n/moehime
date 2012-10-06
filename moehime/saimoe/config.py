@@ -43,7 +43,8 @@ class CrawlConfig(object):
     def __init__(self, date, path=None):
         super(CrawlConfig, self).__init__()
         self.date = date
-        self.path = path
+        # TODO: adapt to some unified persistence management
+        self.path = path if path is not None else self.get_path(date)
         self._inited = False
 
     def get_path(self, date):
