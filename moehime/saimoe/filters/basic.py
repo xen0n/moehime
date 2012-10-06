@@ -133,4 +133,29 @@ class BasicFilter(BaseFilter):
         return True, None
 
 
+@filter_manager.register
+class CountFilter(BaseFilter):
+    '''集计过滤器。
+
+    此过滤器集计所有经过它的有效票。
+
+    为使计票器正常工作并给出有意义结果，此过滤器必须位于过滤序列最后。
+
+    '''
+
+    FILTER_NAME = 'count'
+
+    def setup(self):
+        self._result = {}
+
+    def _do_judge(self, datum):
+        for chara in datum.charas:
+            self._result.setdefault(chara, 1)
+            self._result[chara] += 1
+        return True, None
+
+    def report(self):
+        return self._result
+
+
 # vim:ai:et:ts=4:sw=4:sts=4:ff=unix:fenc=utf-8:
