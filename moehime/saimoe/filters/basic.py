@@ -94,7 +94,7 @@ class InitialFilter(BaseFilter):
         datum.code, text_w_o_code = VOTECODE_RECOGNIZE(text)
 
         charas, moebun = extract_moebun(text_w_o_code)
-        datum.charas.update(charas)
+        datum.charas.extend(charas)
         datum.text = moebun
 
         return True, None
