@@ -26,6 +26,7 @@ class FilterManager(object):
     def __init__(self, cfg=None):
         self._classes = {}
         self._filters = {}
+        self.config = cfg
 
     def register(self, cls):
         name = cls.FILTER_NAME
@@ -36,13 +37,22 @@ class FilterManager(object):
     def filters(self):
         return self._classes
 
+    def get_filter(self, filters, cfg=None, force_empty_cfg=False):
+        cfg = self.cfg if cfg is None and not force_empty_cfg else cfg
+        return ChainedFilter(filters, cfg)
+
 
 class ChainedFilter(object):
-    def __init__(self, filters):
+    def __init__(self, filters, cfg):
         self._filters = []
-        for name, args, kwargs in filters:
+        for filter_arg in filters:
+            if type(filter_arg) in (tuple, list, ):
+                name, args, kwargs = filter_arg
+            else:
+                name, args, kwargs = filter_arg, (), {}
+
             filter_cls = filter_manager.filters[name]
-            self._filters.append(filter_cls(*args, **kwargs))
+            self._filters.append(filter_cls(cfg, *args, **kwargs))
 
     def judge(self, dataset):
         report = {}
