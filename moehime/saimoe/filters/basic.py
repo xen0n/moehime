@@ -41,7 +41,7 @@ VOTECODE_RECOGNIZE = VoteCode.recognize
 
 def _chara_match_helper(charas, match):
     # record the chara and strip it out of text
-    # this way we get pure moe-mon
+    # this way we get pure moebun
     # 记录角色并将其从正文中剔除
     # 这样我们就得到纯粹的萌文
     charas.append(match.group(1))
