@@ -31,7 +31,7 @@ from .net.fetch import ResourceRequester
 # TODO: make this configurable thru app config (although not so useful)
 # 让这个可以通过程序配置自定义（虽然没什么好处）
 CONFIG_ENCODING = 'sjis'
-CONFIG_URL_PREFIX = 'http://saimoe.googlecode.com/files/'
+CONFIG_URL_PREFIX = 'http://saimoe.googlecode.com/files/config'
 CONFIG_PATH_PREFIX = './configs/'
 CONFIG_EXTENSION = '.txt'
 
