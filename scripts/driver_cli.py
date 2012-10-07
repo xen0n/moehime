@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # moehime / scripts / CLI driver
 #
@@ -22,6 +22,13 @@
 from __future__ import unicode_literals, division
 
 import sys
+import os
+
+_realpath = os.path.realpath(__file__)
+_basedir = os.path.dirname(_realpath)
+_pkg_root = os.path.abspath(os.path.join(_basedir, '..'))
+
+sys.path.insert(1, _pkg_root)
 
 from moehime.ui.cli import cli_entry
 
