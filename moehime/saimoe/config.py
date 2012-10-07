@@ -70,7 +70,10 @@ class CrawlConfig(object):
 
         config = parse_config(lines)
 
-        if self.date != config['date']:
+        date, cfg_date = self.date, config['date']
+        self_date_tuple = (date.year, date.month, date.day, )
+        cfg_date_tuple = (cfg_date.year, cfg_date.month, cfg_date.day, )
+        if self_date_tuple != cfg_date_tuple:
             raise ValueError('config date mismatch')
 
         self.groups = config['groups']
