@@ -19,41 +19,30 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with moehime.  If not, see <http://www.gnu.org/licenses/>.
 
-
-from __future__ import unicode_literals, division, print_function
+from __future__ import unicode_literals, division
 
 from sys import stdout, stderr
 from itertools import chain
 
 import cPickle
-import locale
 import datetime
 
 from ..__version__ import VERSION_STR
 
-from ..saimoe import fetch
-from ..saimoe.config import CrawlConfig
-from ..saimoe import parser
-from ..saimoe import counter
+from ..saimoe.config import WebBackedCrawlConfig
+from ..saimoe.datasource import src_manager
+from ..saimoe.filters import filter_manager
 
+from .cliutils import print_wrapper
 
-# Windows console encoding is WAY more restrictive than UTF-8 used by Linux
-# Must provide a wrapper to hide the difference
-# Windows 控制台编码比起 Linux 的 UTF-8 来实在是太不自由了
-# 必须用一层包装隐藏掉这个差异性
-def print_wrapper_factory():
-    enc = locale.getpreferredencoding()
-
-    def _print_wrapper(value='', *args, **kwargs):
-        if isinstance(value, unicode):
-            value = value.encode(enc, 'replace')
-
-        print(value, *args, **kwargs)
-        return
-    return _print_wrapper
-
-
-print_wrapper = print_wrapper_factory()
+DATASOURCES = ('kohada', 'livedoor', )
+FILTERS = (
+        'initial',
+        'basic',
+        'dup',
+        'alias',
+        'count',
+        )
 
 
 def show_banner():
@@ -71,56 +60,41 @@ def print_list(lst):
 
 
 def cli_entry(argv):
-    cfg_path = argv[1]
-    urls = argv[2:]
-
-    cfg = CrawlConfig(cfg_path)
+    cfg = WebBackedCrawlConfig(
+            datetime.datetime.today(),
+            )
     print_wrapper('reading config', file=stderr)
     cfg.readconfig()
 
+    # initialize managers
+    src_manager.config = {
+            'date': cfg.date,
+            'datasources': DATASOURCES,
+            }
+    vote_filter = filter_manager.get_filter(FILTERS, cfg)
+
     # TODO: refactor this!
     groups, aliases = cfg.groups, cfg.aliases
-    # print '\n'.join('%s|%s' % (k, v, )
-    #         for k, v in sorted((v, k) for k, v in aliases.items())
-    #         )
 
     print_wrapper('fetching', file=stderr)
-    htmls = []
-    for url in urls:
-        print_wrapper('  %s ...' % (url, ), end='', file=stderr)
-        s = fetch.do_fetch(url)
-        print_wrapper('%d bytes' % (len(s), ), file=stderr)
-
-        # XXX: chardet couldn't be used, it reported ISO-8859-2 for the
-        # livedoor.jp thing!
-        if url.startswith('http://jbbs.livedoor.jp/'):
-            page_enc = 'euc-jp'
-        else:
-            page_enc = 'cp932'
-
-        htmls.append(s.decode(page_enc, 'replace'))
+    votes = list(src_manager.fetch_votes())
 
     print_wrapper('parsing', file=stderr)
-
-    thread = chain(*[parser.i_dlthreadfromstring(s) for s in htmls])
-
-    posts = parser.i_postfromthread(thread)
-    votes = parser.i_votefromposts(cfg, posts)
-    count_result = counter.countvotes(cfg, votes)
+    count_result = vote_filter.judge(votes)
 
     counts, invalids, dup_ids, dup_codes = [
-            count_result['charas'],
-            count_result['invalids'],
-            count_result['dup_tripcodes'],
-            count_result['dup_codes'],
+            count_result['count'],
+            count_result['alias']['invalids'],
+            count_result['dup']['tripcodes'],
+            count_result['dup']['codes'],
             ]
 
-    print_wrapper('processing done, writing pickle', file=stderr)
-    with open('%s.pickle' % cfg.date.strftime('%Y%m%d'), 'wb') as fp:
-        fp.write(cPickle.dumps({
-            'cfg': cfg,
-            'result': count_result,
-            }))
+    #print_wrapper('processing done, writing pickle', file=stderr)
+    #with open('%s.pickle' % cfg.date.strftime('%Y%m%d'), 'wb') as fp:
+    #    fp.write(cPickle.dumps({
+    #        'cfg': cfg,
+    #        'result': count_result,
+    #        }))
 
     print_wrapper('arranging result for display', end='\n\n', file=stderr)
 
@@ -132,8 +106,9 @@ def cli_entry(argv):
             name_end = name.find('＠')
             short_name = name if name_end == -1 else name[:name_end]
 
-            chara_pool = counts.get(name, [])
-            chara_count = len(chara_pool)
+            #chara_pool = counts.get(name, [])
+            #chara_count = len(chara_pool)
+            chara_count = counts.get(name, [])
 
             sublist.append((chara_count, short_name, ))
 
@@ -141,7 +116,8 @@ def cli_entry(argv):
         displaylists.append(sublist)
         total_counts.append(sum(i[0] for i in sublist))
 
-    invalids_list = [(len(v), k) for k, v in invalids.iteritems()]
+    #invalids_list = [(len(v), k) for k, v in invalids.iteritems()]
+    invalids_list = [(v, k) for k, v in invalids.iteritems()]
     invalids_list.sort(reverse=True)
 
     # display
@@ -154,10 +130,12 @@ def cli_entry(argv):
     print_list(invalids_list)
 
     print_wrapper('以下为重复的帖子 ID')
-    print_list(sorted((len(v) + 1, k) for k, v in dup_ids.iteritems()))
+    #print_list(sorted((len(v) + 1, k) for k, v in dup_ids.iteritems()))
+    print_list(sorted((v + 1, k) for k, v in dup_ids.iteritems()))
 
     print_wrapper('以下为重复的 code')
-    print_list(sorted((len(v) + 1, k) for k, v in dup_codes.iteritems()))
+    #print_list(sorted((len(v) + 1, k) for k, v in dup_codes.iteritems()))
+    print_list(sorted((v + 1, k) for k, v in dup_codes.iteritems()))
 
     # print >>stderr, '\n'.join(repr(i) for i in aliases.iterkeys())
 
