@@ -22,6 +22,7 @@
 from __future__ import unicode_literals, division
 
 from functools import wraps
+from collections import Counter
 
 from . import filter_manager
 from .base import BaseFilter
@@ -91,8 +92,8 @@ class AliasFilter(BaseFilter):
         return False, False, None
 
     def setup(self):
-        self._aliases_encountered = {}
-        self._invalids_encountered = {}
+        self._aliases_encountered = Counter()
+        self._invalids_encountered = Counter()
 
     def _do_judge(self, datum):
         norm_charas, aliases, invalids = [], [], []
@@ -106,12 +107,10 @@ class AliasFilter(BaseFilter):
 
                     # update global statistics
                     # 更新全局统计信息
-                    self._aliases_encountered.setdefault(chara, 0)
                     self._aliases_encountered[chara] += 1
             else:
                 invalids.append(chara)
 
-                self._invalids_encountered.setdefault(chara, 0)
                 self._invalids_encountered[chara] += 1
 
         datum.charas = norm_charas
@@ -124,8 +123,8 @@ class AliasFilter(BaseFilter):
 
     def report(self):
         return {
-                'aliases': self._aliases_encountered,
-                'invalids': self._invalids_encountered,
+                'aliases': dict(self._aliases_encountered),
+                'invalids': dict(self._invalids_encountered),
                 }
 
 

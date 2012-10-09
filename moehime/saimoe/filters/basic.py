@@ -23,6 +23,7 @@ from __future__ import unicode_literals, division
 
 import re
 from functools import partial
+from collections import Counter
 
 from . import filter_manager
 from .base import BaseFilter
@@ -146,16 +147,14 @@ class CountFilter(BaseFilter):
     FILTER_NAME = 'count'
 
     def setup(self):
-        self._result = {}
+        self._result = Counter()
 
     def _do_judge(self, datum):
-        for chara in datum.charas:
-            self._result.setdefault(chara, 0)
-            self._result[chara] += 1
+        self._result.update(datum.charas)
         return True, None
 
     def report(self):
-        return self._result
+        return dict(self._result)
 
 
 # vim:ai:et:ts=4:sw=4:sts=4:ff=unix:fenc=utf-8:
