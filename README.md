@@ -27,33 +27,33 @@ Windows 环境的测试我会在进入 Windows 环境之后第一时间着手进
 以Linux 系统为例，假设你已经可以使用 pip 和 git 了。如果没有的话，参照
 发行版的说明先装上，类似这样：
 
-  $ sudo apt-get install pip git  # Debian/Ubuntu 系
-  $ sudo emerge pip git  # Gentoo
-  $ sudo yum install pip git  # RH 系
+    $ sudo apt-get install pip git  # Debian/Ubuntu 系
+    $ sudo emerge pip git  # Gentoo
+    $ sudo yum install pip git  # RH 系
 
 安装 virtualenv 虚拟环境，避免影响系统全局的包版本：
 
-  $ pip install virtualenv
+    $ pip install virtualenv
 
 接下来其实是下载软件和部署依赖关系的步骤：
 
-  $ mkdir path/to/install/into  # 换成你想安装的目录位置
-  $ cd path/to/install/into
-  $ virtualenv moehime
-  $ cd moehime
-  $ git clone https://github.com/xen0n/moehime.git  # 拉下整个版本库
-  $ pip install -r moehime/requirements.txt  # 安装依赖关系
-  $ mkdir configs  # 建立一个 config 文件目录
-  $ ln -s moehime/scripts/driver\_cli.py driver.py
+    $ mkdir path/to/install/into  # 换成你想安装的目录位置
+    $ cd path/to/install/into
+    $ virtualenv moehime
+    $ cd moehime
+    $ git clone https://github.com/xen0n/moehime.git  # 拉下整个版本库
+    $ pip install -r moehime/requirements.txt  # 安装依赖关系
+    $ mkdir configs  # 建立一个 config 文件目录
+    $ ln -s moehime/scripts/driver\_cli.py driver.py
 
 安装完成。使用方法：
 
-  $ cd path/to/install/into/moehime  # 进入安装位置的 moehime 目录
-  $ . bin/activate  # 激活虚拟环境
+    $ cd path/to/install/into/moehime  # 进入安装位置的 moehime 目录
+    $ . bin/activate  # 激活虚拟环境
 
 以上两步不必每次都做，激活虚拟环境之后只要执行
 
-  $ ./driver.py
+    $ ./driver.py
 
 就可以了。
 
