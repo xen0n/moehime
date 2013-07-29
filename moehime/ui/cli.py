@@ -35,7 +35,7 @@ from ..saimoe.filters import filter_manager
 
 from .cliutils import print_wrapper
 
-DATASOURCES = ('kohada', 'livedoor', )
+DATASOURCES = ('livedoor', 'kohada', )
 FILTERS = (
         'initial',
         'basic',
