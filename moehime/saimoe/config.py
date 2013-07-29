@@ -50,8 +50,8 @@ class CrawlConfig(object):
     def get_path(self, date):
         # while this seems duplicate wrt WebBasedCrawlConfig.get_config_url,
         # actually the local config file's naming convention has nothing to
-        # do with that of theremote repository.
-        return unicode(date.strftime('%m%d')).join((
+        # do with that of the remote repository.
+        return unicode(date.strftime('%Y%m%d')).join((
             CONFIG_PATH_PREFIX,
             CONFIG_EXTENSION,
             ))
