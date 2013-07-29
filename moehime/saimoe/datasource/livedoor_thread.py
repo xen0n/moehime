@@ -30,14 +30,14 @@ from .base import PostThreadInfoBase
 from ..exc import ThreadBadTitleError
 
 # RE_NUM_REPLIES = re.compile(r'^\((\d+)\)$')
-RE_SIMPLE_TID = re.compile(r'read.cgi/anime/8440/(\d+)/$')
+RE_SIMPLE_TID = re.compile(r'read.cgi/anime/10101/(\d+)/$')
 RE_MTIME = re.compile(
         r'投稿日：\s+'
         r'(?P<Y>\d{4})/(?P<m>\d{2})/(?P<d>\d{2})\([日月水火木金土]\)\s+'
         r'(?P<H>\d{2}):(?P<M>\d{2}):(?P<S>\d{2})'
         )
 
-VOTE_THREAD_SIGNATURE = '投票補助スレ'
+VOTE_THREAD_SIGNATURE = '投票スレ'
 
 
 class PostThreadInfo_livedoor(PostThreadInfoBase):

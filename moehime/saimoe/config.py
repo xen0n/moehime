@@ -31,7 +31,7 @@ from .net.fetch import ResourceRequester
 # TODO: make this configurable thru app config (although not so useful)
 # 让这个可以通过程序配置自定义（虽然没什么好处）
 CONFIG_ENCODING = 'sjis'
-CONFIG_URL_PREFIX = 'http://saimoe.googlecode.com/files/config'
+CONFIG_URL_PREFIX = 'http://acst13.saimoe.me/dat/conf/config'
 CONFIG_PATH_PREFIX = './configs/'
 CONFIG_EXTENSION = '.txt'
 
@@ -168,7 +168,7 @@ def parse_config(lines):
 
     # [[] * num_per_grp] is WRONG: it's SHALLOW copy!
     # [[] * num_per_grp] 是不行的：那是浅拷贝！
-    groups = [[] for i in xrange(num_per_grp)]
+    groups = [[] for i in xrange(grp_cnt)]
     for count, ln in enumerate(ln_charas):
         chara = parse_chara(ln)
 

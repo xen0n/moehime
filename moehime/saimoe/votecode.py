@@ -29,7 +29,7 @@ from .exc import MalformedCodeError
 # 匹配code
 # Vote code
 RE_CODE_EXPR = (
-        r'^\[\[asm(?P<yy>\d{2})-(?P<d>\d+)-'
+        r'^\[\[AS(?P<yy>\d{2})-(?P<d>\d+)-'
         r'(?P<nonce>[0-9A-Za-z./]{8})-'
         r'(?P<issued>[A-Za-z])(?P<tail>[A-Za-z])'
         r'\]\]-(?P<ord>\d{5})$'
@@ -39,7 +39,7 @@ RE_CODE_EXPR = (
 # groups inside
 # 这个只是识别用的，没有组
 RE_CODE_RECOG_EXPR = (
-        r'\[\[asm\d{2}-\d+-'
+        r'\[\[AS\d{2}-\d+-'
         r'[0-9A-Za-z./]{8}-'
         r'[A-Za-z][A-Za-z]'
         r'\]\]-\d{5}'

@@ -108,7 +108,7 @@ def cli_entry(argv):
 
             #chara_pool = counts.get(name, [])
             #chara_count = len(chara_pool)
-            chara_count = counts.get(name, [])
+            chara_count = counts.get(name, 0)
 
             sublist.append((chara_count, short_name, ))
 

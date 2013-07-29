@@ -37,7 +37,7 @@ RE_MTIME = re.compile(
         r'(?P<H>\d{2}):(?P<M>\d{2})$'
         )
 
-VOTE_TITLE_SIGNATURE = '投票スレ'
+VOTE_TITLE_SIGNATURE = '投票補助スレ'
 
 
 class PostThreadInfo_2ch(PostThreadInfoBase):

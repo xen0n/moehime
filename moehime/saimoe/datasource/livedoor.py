@@ -29,7 +29,7 @@ from .s_2ch import Base2chDatasource
 from .livedoor_thread import PostThreadInfo_livedoor
 from .livedoor_post import Post_livedoor
 
-THREAD_LIST_URL = b'http://jbbs.livedoor.jp/anime/8440/'
+THREAD_LIST_URL = b'http://jbbs.livedoor.jp/anime/10101/'
 THREAD_LIST_SELECTOR = b'a[name != "menu"] + table dl'
 
 
@@ -54,7 +54,7 @@ class LivedoorDatasource(Base2chDatasource):
 
     @property
     def readcgi_url(self):
-        return 'bbs/read.cgi/anime/8440/%(tid)s/%(start)d-%(end)s'
+        return 'bbs/read.cgi/anime/10101/%(tid)s/%(start)d-%(end)s'
 
     @property
     def post_list_selector(self):

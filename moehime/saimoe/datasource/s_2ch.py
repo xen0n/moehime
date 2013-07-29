@@ -31,7 +31,7 @@ from ..net.fetch import ResourceRequester
 from .s_2ch_thread import PostThreadInfo_2ch
 from .s_2ch_post import Post_2ch
 
-FIND_STRING = 'アニメ最萌トーナメント2012 board:投票所'
+FIND_STRING = 'アニメ最萌トーナメント2013 board:投票所'
 
 
 class Base2chDatasource(DatasourceBase, ResourceRequester):

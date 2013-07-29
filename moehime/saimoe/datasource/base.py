@@ -59,6 +59,7 @@ class DatasourceBase(object):
 
         threads = self._do_get_thread_list(max_count)
         for raw_thread in threads:
+            # print '[get_thread_list]', raw_thread
             try:
                 yield thread_class(raw_thread, self)
             except ThreadInfoError:

@@ -73,6 +73,7 @@ class DatasourceManager(object):
         day_tuple = (day.year, day.month, day.day, )
 
         for thread in self.fetch_all_threads():
+            # print '[fetch_threads]', thread
             mtime = thread.mtime
             mtime_tuple = (mtime.year, mtime.month, mtime.day, )
             if day_tuple != mtime_tuple:
@@ -83,6 +84,7 @@ class DatasourceManager(object):
     def fetch_posts(self):
         for thread in self.fetch_threads():
             for post in thread.get_posts():
+                # print '[fetch_posts]', post
                 yield post
 
     def fetch_votes(self):
