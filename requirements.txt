@@ -1,4 +1,4 @@
 lxml>=2.3.2
-pyquery>=1.2
+git+https://github.com/gawel/pyquery.git
 requests>=0.13.2
 matplotlib>=1.1

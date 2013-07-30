@@ -43,7 +43,8 @@ class ResourceRequester(object):
 
     def __init__(self):
         super(ResourceRequester, self).__init__()
-        self._requests_session = requests.session(headers={
+        session = self._requests_session = requests.Session()
+        session.headers.update({
                 'User-Agent': UA,
                 })
 
