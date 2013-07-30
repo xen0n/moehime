@@ -46,6 +46,7 @@ class ResourceRequester(object):
         session = self._requests_session = requests.Session()
         session.headers.update({
                 'User-Agent': UA,
+                'Accept-Encoding': 'gzip,deflate',
                 })
 
     @abc.abstractmethod
